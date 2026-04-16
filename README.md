@@ -229,18 +229,3 @@ Open `tableau/sales_funnel_dashboard_final.html` in any browser for the standalo
 Live Tableau Public dashboard: *[link to be added after publish]*
 
 ---
-
-## Analytical Decision Log
-
-Every significant analytical decision made during this project is documented in the interactive flowchart — `project_flowchart.html`. Open it in any browser to see:
-
-- Why PostgreSQL was chosen over MySQL
-- Why nulls were filled rather than deleted
-- Why the IQR fence changed from 798.34 to 797.83
-- Why the Singles Day spike was kept rather than treated as an outlier
-- Why IN (SELECT) subqueries were replaced with CTEs
-- 13 decisions total with full rationale
-
----
-
-*Built as a portfolio data analytics project · PostgreSQL 18.3 · Pure SQL · No Python*
