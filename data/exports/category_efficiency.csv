@@ -1,0 +1,16 @@
+category_code,viewers,purchases,total_revenue,avg_price,revenue_per_viewer,revenue_per_purchase,efficiency_rank
+electronics.smartphone,2095954,575811,168253935.55,292.20,80.28,292.20,1
+electronics.video.tv,369363,49239,17636907.56,358.19,47.75,358.19,2
+computers.notebook,237855,27419,11334477.06,413.38,47.65,413.38,3
+appliances.kitchen.washer,265374,35715,10246161.80,286.89,38.61,286.89,4
+appliances.kitchen.refrigerators,250773,23180,7334167.98,316.40,29.25,316.40,5
+electronics.clocks,424440,40664,10729869.94,263.87,25.28,263.87,6
+electronics.camera.photo,5449,286,110475.30,386.28,20.27,386.28,7
+appliances.kitchen.dishwasher,32785,1646,660277.26,401.14,20.14,401.14,8
+computers.peripherals.printer,50958,5174,1012321.37,195.66,19.87,195.66,9
+electronics.audio.headphone,474771,71334,9207408.76,129.07,19.39,129.07,10
+electronics.tablet,119102,10933,2228116.57,203.80,18.71,203.80,11
+computers.peripherals.monitor,33138,2636,582802.27,221.09,17.59,221.09,12
+computers.components.videocards,30218,1897,508770.45,268.20,16.84,268.20,13
+appliances.environment.vacuum,270512,30435,4363858.69,143.38,16.13,143.38,14
+appliances.kitchen.hob,34947,2337,502584.44,215.06,14.38,215.06,15

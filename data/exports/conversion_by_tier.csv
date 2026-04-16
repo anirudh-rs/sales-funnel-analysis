@@ -1,0 +1,4 @@
+price_tier,unique_users,carted_users,purchased_users,cart_rate_pct,purchase_rate_pct
+Mid-range (50-200),3405049,516235,349542,15.16,10.27
+Premium (200-798),3295691,469619,289911,14.25,8.80
+Budget (0-50),2286779,249235,166330,10.90,7.27

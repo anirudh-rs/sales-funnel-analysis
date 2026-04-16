@@ -1,0 +1,8 @@
+day_name,day_of_week,unique_users,purchasers,purchase_rate_pct
+Sunday,0,1498832,198771,13.26
+Monday,1,1418255,117354,8.27
+Tuesday,2,1534605,122780,8.00
+Wednesday,3,1534469,125694,8.19
+Thursday,4,1519588,122034,8.03
+Friday,5,1601212,121900,7.61
+Saturday,6,1618974,151949,9.39

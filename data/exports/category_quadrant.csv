@@ -1,0 +1,21 @@
+category_code,viewers,purchasers,conversion_pct,total_revenue,performance_quadrant
+electronics.smartphone,2095954,272212,12.99,168253935.55,Star — high conv high rev
+electronics.video.tv,369363,31051,8.41,17636907.56,Star — high conv high rev
+computers.notebook,237855,17064,7.17,11334477.06,Star — high conv high rev
+electronics.clocks,424440,24340,5.73,10729869.94,Star — high conv high rev
+appliances.kitchen.washer,265374,22948,8.65,10246161.80,Star — high conv high rev
+electronics.audio.headphone,474771,42128,8.87,9207408.76,Star — high conv high rev
+appliances.kitchen.refrigerators,250773,16264,6.49,7334167.98,Star — high conv high rev
+appliances.environment.vacuum,270512,22931,8.48,4363858.69,Star — high conv high rev
+electronics.tablet,119102,7316,6.14,2228116.57,Star — high conv high rev
+computers.desktop,140032,4162,2.97,1495332.45,Deprioritise — low conv low rev
+apparel.shoes,354912,9188,2.59,1263447.26,Deprioritise — low conv low rev
+furniture.living_room.sofa,92731,1704,1.84,1117719.95,Deprioritise — low conv low rev
+furniture.living_room.cabinet,128518,3139,2.44,1076557.40,Deprioritise — low conv low rev
+computers.peripherals.printer,50958,3646,7.15,1012321.37,Quick win — high conv low rev
+auto.accessories.player,139800,5881,4.21,991548.27,Quick win — high conv low rev
+furniture.bedroom.bed,167900,3592,2.14,922586.73,Deprioritise — low conv low rev
+appliances.kitchen.oven,69549,4603,6.62,809067.37,Quick win — high conv low rev
+kids.carriage,64509,3388,5.25,797510.12,Quick win — high conv low rev
+auto.accessories.alarm,83743,4147,4.95,789240.75,Quick win — high conv low rev
+appliances.kitchen.microwave,84466,7008,8.30,732338.94,Quick win — high conv low rev

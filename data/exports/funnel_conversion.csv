@@ -1,0 +1,8 @@
+stage,stage_name,users,conversion_rate_pct,dropoff_rate_pct,dropoff_users
+Stage 1,Exposure,5076814,,,
+Stage 2,View,5076318,99.99,0.01,496
+Stage 3,Repeat view,3225600,63.54,36.46,1850718
+Stage 4,Cart,980376,19.31,80.69,4095942
+Stage 5,Cart abandon,454687,46.38,,
+Stage 6,Purchase,655222,66.83,33.17,325154
+Stage 7,Repeat buy,270374,41.26,58.74,384848

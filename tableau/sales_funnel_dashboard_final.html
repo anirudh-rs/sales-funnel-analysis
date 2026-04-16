@@ -1,0 +1,592 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sales Funnel Drop-off Analysis</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Sans:wght@300;400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg:#f4f2ed;--bg2:#eae7e0;--bg3:#dedad1;
+    --surface:#ffffff;--surface2:#f8f6f1;
+    --text:#18160f;--text2:#48443a;--text3:#807b72;
+    --accent:#bf3a0e;--accent2:#1a5c3a;--accent3:#0f3d6e;
+    --amber:#b06800;--purple:#4a2d8a;
+    --border:rgba(0,0,0,0.08);--border2:rgba(0,0,0,0.14);
+    --r:10px;--font:'IBM Plex Sans',sans-serif;
+    --mono:'IBM Plex Mono',monospace;--display:'Playfair Display',Georgia,serif;
+  }
+  [data-theme=dark]{
+    --bg:#0e0d0a;--bg2:#171510;--bg3:#1f1d18;
+    --surface:#1a1814;--surface2:#222018;
+    --text:#f0ece2;--text2:#b0aa9e;--text3:#706a60;
+    --accent:#e04a18;--accent2:#2db866;--accent3:#3a88d4;
+    --amber:#d48800;--purple:#7a5de0;
+    --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  body{font-family:var(--font);background:var(--bg);color:var(--text);transition:background .3s,color .3s;min-height:100vh;}
+
+  /* NAV */
+  nav{position:sticky;top:0;z-index:200;background:var(--surface);border-bottom:1px solid var(--border2);height:52px;display:flex;align-items:center;justify-content:space-between;padding:0 1.5rem;gap:1rem;}
+  .nav-brand{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--text3);letter-spacing:.08em;text-transform:uppercase;white-space:nowrap;}
+  .nav-tabs{display:flex;gap:2px;}
+  .nav-tab{font-size:12px;font-weight:500;padding:5px 14px;border-radius:20px;border:none;background:transparent;color:var(--text3);cursor:pointer;font-family:var(--font);transition:all .2s;white-space:nowrap;}
+  .nav-tab:hover,.nav-tab.active{background:var(--bg2);color:var(--text);}
+  .nav-tab.active{background:var(--accent);color:#fff;}
+  .nav-right{display:flex;align-items:center;gap:10px;}
+  .toggle{width:38px;height:20px;background:var(--bg3);border:1px solid var(--border2);border-radius:10px;cursor:pointer;position:relative;flex-shrink:0;}
+  .toggle::after{content:'';position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;background:var(--text3);transition:transform .3s;}
+  [data-theme=dark] .toggle::after{transform:translateX(18px);background:var(--accent3);}
+
+  /* PAGES */
+  .page{display:none;max-width:1280px;margin:0 auto;padding:1.5rem;}
+  .page.active{display:block;}
+
+  /* KPI ROW */
+  .kpi-row{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:1.5rem;}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem .9rem;transition:border-color .2s;}
+  .kpi:hover{border-color:var(--border2);}
+  .kpi-label{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px;}
+  .kpi-val{font-family:var(--mono);font-size:1.55rem;font-weight:500;line-height:1;margin-bottom:5px;}
+  .kpi-val.red{color:var(--accent);}
+  .kpi-val.green{color:var(--accent2);}
+  .kpi-val.blue{color:var(--accent3);}
+  .kpi-val.amber{color:var(--amber);}
+  .kpi-val.purple{color:var(--purple);}
+  .kpi-def{font-size:10px;color:var(--text3);line-height:1.4;}
+
+  /* HERO BAND */
+  .hero-band{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.5rem;margin-bottom:1.5rem;display:grid;grid-template-columns:1fr 260px;gap:2rem;align-items:center;}
+  .hero-eyebrow{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:10px;}
+  .hero-title{font-family:var(--display);font-size:clamp(1.6rem,3vw,2.4rem);line-height:1.15;color:var(--text);margin-bottom:10px;}
+  .hero-title em{font-style:italic;color:var(--accent);}
+  .hero-body{font-size:13px;line-height:1.7;color:var(--text2);}
+  .hero-stats{display:flex;flex-direction:column;gap:8px;}
+  .hero-stat{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;background:var(--bg2);border-radius:6px;}
+  .hero-stat-label{font-size:11px;color:var(--text3);}
+  .hero-stat-val{font-family:var(--mono);font-size:12px;font-weight:500;color:var(--text);}
+
+  /* NARRATIVE */
+  .narrative{font-size:13px;line-height:1.75;color:var(--text2);padding:.9rem 1.1rem;background:var(--surface);border-left:3px solid var(--accent);border-radius:0 6px 6px 0;margin-bottom:1.25rem;}
+  .narrative strong{color:var(--text);font-weight:500;}
+
+  /* CHART CARDS */
+  .card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.25rem;margin-bottom:1.25rem;}
+  .card-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:1rem;gap:1rem;}
+  .card-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;}
+  .card-sub{font-size:11px;color:var(--text3);}
+  .card-badge{font-family:var(--mono);font-size:10px;padding:3px 8px;border-radius:4px;background:var(--bg2);color:var(--text3);white-space:nowrap;flex-shrink:0;}
+  .ch{position:relative;width:100%;}
+  .ch-300{height:300px;}
+  .ch-260{height:260px;}
+  .ch-220{height:220px;}
+  .ch-200{height:200px;}
+
+  /* GRID LAYOUTS */
+  .g2{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;}
+  .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:1.25rem;margin-bottom:1.25rem;}
+  .g21{display:grid;grid-template-columns:2fr 1fr;gap:1.25rem;margin-bottom:1.25rem;}
+
+  /* INSIGHT */
+  .insight{display:flex;gap:10px;align-items:flex-start;background:var(--bg2);border-radius:6px;padding:10px 12px;margin-top:10px;}
+  .insight-dot{width:16px;height:16px;border-radius:50%;background:var(--accent);flex-shrink:0;margin-top:1px;}
+  .insight-text{font-size:11px;color:var(--text2);line-height:1.55;}
+  .insight-text strong{color:var(--text);font-weight:500;}
+
+  /* PREP CARDS */
+  .prep-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:1.5rem;}
+  .prep-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.9rem 1rem;}
+  .prep-step{font-family:var(--mono);font-size:9px;font-weight:500;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;}
+  .prep-title{font-size:12px;font-weight:500;color:var(--text);margin-bottom:4px;}
+  .prep-stat{font-family:var(--mono);font-size:18px;font-weight:500;color:var(--accent);margin-bottom:4px;}
+  .prep-desc{font-size:11px;color:var(--text3);line-height:1.5;}
+
+  /* REC CARDS */
+  .rec-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;}
+  .rec-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1rem;transition:border-color .2s;}
+  .rec-card:hover{border-color:var(--accent);}
+  .rec-num{font-family:var(--mono);font-size:9px;font-weight:500;color:var(--accent);margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em;}
+  .rec-title{font-size:12px;font-weight:600;color:var(--text);margin-bottom:6px;line-height:1.35;}
+  .rec-body{font-size:11px;color:var(--text3);line-height:1.55;margin-bottom:8px;}
+  .rec-opp{font-family:var(--mono);font-size:11px;font-weight:500;color:var(--accent2);}
+
+  /* SECTION HEADER */
+  .sec-header{display:flex;align-items:baseline;gap:12px;margin-bottom:1rem;}
+  .sec-num{font-family:var(--mono);font-size:10px;color:var(--text3);}
+  .sec-title{font-family:var(--display);font-size:1.3rem;font-weight:400;color:var(--text);}
+
+  /* LEGEND */
+  .legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;font-size:11px;color:var(--text3);}
+  .leg{display:flex;align-items:center;gap:5px;}
+  .leg-sq{width:10px;height:10px;border-radius:2px;}
+
+  /* PAGE TITLE BAND */
+  .page-title-band{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.9rem 1.1rem;margin-bottom:1.25rem;display:flex;align-items:center;justify-content:space-between;}
+  .ptb-title{font-family:var(--display);font-size:1.1rem;font-weight:400;color:var(--text);}
+  .ptb-sub{font-size:11px;color:var(--text3);}
+
+  /* FOOTER */
+  footer{max-width:1280px;margin:0 auto;padding:.75rem 1.5rem 2rem;font-size:11px;color:var(--text3);border-top:1px solid var(--border);}
+
+  @media(max-width:900px){
+    .kpi-row{grid-template-columns:repeat(2,1fr);}
+    .hero-band{grid-template-columns:1fr;}
+    .g2,.g3,.g21{grid-template-columns:1fr;}
+    .rec-grid{grid-template-columns:repeat(2,1fr);}
+    .prep-grid{grid-template-columns:repeat(2,1fr);}
+    .nav-tabs{display:none;}
+  }
+</style>
+</head>
+<body data-theme="light">
+
+<nav>
+  <span class="nav-brand">Sales Funnel Analysis · PostgreSQL 18.3</span>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showPage(0,this)">Overview</button>
+    <button class="nav-tab" onclick="showPage(1,this)">Performance</button>
+    <button class="nav-tab" onclick="showPage(2,this)">Revenue &amp; Insights</button>
+  </div>
+  <div class="nav-right">
+    <button class="toggle" onclick="toggleTheme()" title="Toggle theme"></button>
+  </div>
+</nav>
+
+<!-- ══════════════════════════════════
+     PAGE 1 — OVERVIEW
+══════════════════════════════════ -->
+<div class="page active" id="page0">
+
+  <!-- HERO -->
+  <div class="hero-band">
+    <div>
+      <div class="hero-eyebrow">E-commerce · Portfolio Project · Oct–Nov 2019</div>
+      <h1 class="hero-title">Where do customers <em>drop off</em> —<br>and what does it cost?</h1>
+      <p class="hero-body">Every e-commerce team tracks overall conversion rate. But the real question is <strong>which stage</strong> is leaking users — and whether the cause is price, engagement, or something else entirely. This analysis processes 109 million real events across 5.3 million users to find out. The answer is surprising: the barrier to purchase is not price. It never was.</p>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat"><span class="hero-stat-label">Total rows</span><span class="hero-stat-val">109.8M</span></div>
+      <div class="hero-stat"><span class="hero-stat-label">Period</span><span class="hero-stat-val">Oct–Nov 2019</span></div>
+      <div class="hero-stat"><span class="hero-stat-label">Unique users</span><span class="hero-stat-val">5.3M</span></div>
+      <div class="hero-stat"><span class="hero-stat-label">Revenue analysed</span><span class="hero-stat-val">$315M</span></div>
+      <div class="hero-stat"><span class="hero-stat-label">SQL scripts</span><span class="hero-stat-val">13 files</span></div>
+      <div class="hero-stat"><span class="hero-stat-label">CSV exports</span><span class="hero-stat-val">25 files</span></div>
+    </div>
+  </div>
+
+  <!-- KPIs -->
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-label">Overall conversion</div><div class="kpi-val red">12.90%</div><div class="kpi-def">View to purchase · 62 days</div></div>
+    <div class="kpi"><div class="kpi-label">Biggest drop-off</div><div class="kpi-val red">80.69%</div><div class="kpi-def">View → Cart · 4,095,942 users lost</div></div>
+    <div class="kpi"><div class="kpi-label">Total revenue</div><div class="kpi-val green">$315M</div><div class="kpi-def">9 weeks · excl. price outliers</div></div>
+    <div class="kpi"><div class="kpi-label">Singles Day share</div><div class="kpi-val amber">21.53%</div><div class="kpi-def">Nov 11 week · $67.8M revenue</div></div>
+    <div class="kpi"><div class="kpi-label">Top 10% revenue</div><div class="kpi-val purple">49.83%</div><div class="kpi-def">65,524 users drive half of revenue</div></div>
+    <div class="kpi"><div class="kpi-label">Cart abandonment</div><div class="kpi-val red">46.38%</div><div class="kpi-def">454,687 users · price not the cause</div></div>
+    <div class="kpi"><div class="kpi-label">Apple per viewer</div><div class="kpi-val blue">$83.56</div><div class="kpi-def">Most efficient brand · vs $49.42 Samsung</div></div>
+    <div class="kpi"><div class="kpi-label">Best day</div><div class="kpi-val green">Sunday</div><div class="kpi-def">13.26% vs Friday 7.61%</div></div>
+    <div class="kpi"><div class="kpi-label">Best category</div><div class="kpi-val blue">12.99%</div><div class="kpi-def">electronics.smartphone</div></div>
+    <div class="kpi"><div class="kpi-label">Unique users</div><div class="kpi-val amber">5.3M</div><div class="kpi-def">Across Oct–Nov 2019</div></div>
+  </div>
+
+  <!-- FUNNEL CHART -->
+  <div class="sec-header"><span class="sec-num">01</span><h2 class="sec-title">The 7-stage funnel</h2></div>
+  <div class="narrative">The dataset contains three raw event types: view, cart, and purchase. Seven behavioural stages were derived from these. The most striking finding is the <strong>view-to-cart gap</strong> — 80.69% of all users who viewed a product never added anything to cart. That single stage accounts for 4,095,942 lost potential customers.</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">User count at each funnel stage</div><div class="card-sub">Colour = drop-off severity · Green = low · Red = high · File: dropoff_by_stage.csv</div></div>
+      <div class="card-badge">5,076,814 total users</div>
+    </div>
+    <div class="ch ch-300"><canvas id="c_funnel" role="img" aria-label="Horizontal bar chart showing user count at each of 7 funnel stages coloured by drop-off rate"></canvas></div>
+    <div class="legend">
+      <div class="leg"><div class="leg-sq" style="background:#1D9E75"></div>Low drop-off (0–5%)</div>
+      <div class="leg"><div class="leg-sq" style="background:#EF9F27"></div>Medium (5–50%)</div>
+      <div class="leg"><div class="leg-sq" style="background:#E24B4A"></div>High drop-off (50%+)</div>
+    </div>
+    <div class="insight"><div class="insight-dot"></div><div class="insight-text"><strong>The engagement gap, not the price gap.</strong> Converted users averaged $209.70 cart price vs $208.06 for abandoned — a difference of $1.64. Price is not the barrier. Converted users had 40% more views (60 vs 42.8) and twice the cart events (4.6 vs 2.3). The barrier is engagement depth, not cost.</div></div>
+  </div>
+
+  <!-- OBSTACLES -->
+  <div class="sec-header" style="margin-top:1.5rem"><span class="sec-num">02</span><h2 class="sec-title">The obstacles — preprocessing pipeline</h2></div>
+  <div class="narrative">Before any analysis could run, five categories of data quality problems were identified and resolved entirely in SQL. The preprocessing pipeline — not the charts — is the core technical work of this project.</div>
+  <div class="prep-grid">
+    <div class="prep-card"><div class="prep-step">Step 03 · Null handling</div><div class="prep-title">Missing values filled</div><div class="prep-stat">50.7M</div><div class="prep-desc">category_code and brand nulls filled with placeholder values. Dropping 32% of rows would have destroyed funnel validity.</div></div>
+    <div class="prep-card"><div class="prep-step">Step 04 · Deduplication</div><div class="prep-title">Duplicate events removed</div><div class="prep-stat">130,750</div><div class="prep-desc">Cart event flooding — worst case 78 identical cart events in one session. ROW_NUMBER() with ctid used to avoid doubling disk usage.</div></div>
+    <div class="prep-card"><div class="prep-step">Step 05 · Date normalisation</div><div class="prep-title">Timezone split resolved</div><div class="prep-stat">2 offsets</div><div class="prep-desc">-04:00 EDT (Oct) and -05:00 EST (Nov). US DST changed Nov 3. All converted to UTC. 7 derived date columns stored.</div></div>
+    <div class="prep-card"><div class="prep-step">Step 06 · Outlier detection</div><div class="prep-title">Price outliers flagged</div><div class="prep-stat">9.87M</div><div class="prep-desc">IQR method — price data is right-skewed. Upper fence $797.83. Flagged not deleted — 163K legitimate high-value purchases above fence.</div></div>
+    <div class="prep-card"><div class="prep-step">Step 07 · Master clean</div><div class="prep-title">vw_clean_events created</div><div class="prep-stat">109.8M</div><div class="prep-desc">Single reusable view adding funnel_stage, price_tier, day_name and month_name. All 5 analysis scripts build from this view.</div></div>
+    <div class="prep-card"><div class="prep-step">Real-world obstacle</div><div class="prep-title">Excel silent truncation</div><div class="prep-stat">8.7GB→128MB</div><div class="prep-desc">October file truncated by Excel to 1,048,575 rows with no warning. Required full re-download. Rule: never open large CSVs in Excel.</div></div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════
+     PAGE 2 — PERFORMANCE
+══════════════════════════════════ -->
+<div class="page" id="page1">
+
+  <div class="page-title-band">
+    <div><div class="ptb-title">Funnel performance analysis</div><div class="ptb-sub">Weekly trends · Category scatter · Brand efficiency · Day of week conversion</div></div>
+    <div class="card-badge">Dashboard 2 of 3</div>
+  </div>
+
+  <!-- WEEKLY REVENUE -->
+  <div class="sec-header"><span class="sec-num">03</span><h2 class="sec-title">Weekly revenue & WoW change</h2></div>
+  <div class="narrative">9 weeks of data show a stable baseline of $28–37M per week — then a single anomalous week that changes everything. <strong>November 11, 2019</strong> was Singles Day. Combined with early Black Friday promotions, that one week generated $67.8M — 21.53% of the entire 9-week revenue total.</div>
+
+  <div class="card">
+    <div class="card-header">
+      <div><div class="card-title">Weekly revenue ($M) with week-on-week % change</div><div class="card-sub">Bars = revenue · Line = WoW % change · File: wow_core_metrics.csv</div></div>
+      <div class="card-badge">$315M total</div>
+    </div>
+    <div class="ch ch-300"><canvas id="c_weekly" role="img" aria-label="Dual axis chart showing weekly revenue bars and week on week percentage change line with Singles Day spike on Nov 11"></canvas></div>
+    <div class="insight"><div class="insight-dot"></div><div class="insight-text"><strong>Singles Day effect.</strong> +116.94% revenue WoW. Cart abandonment hit 58.51% that week — users added items but waited for Black Friday. Nov 18 shows deferred purchases completing, then the funnel returns to baseline by Nov 25.</div></div>
+  </div>
+
+  <!-- CATEGORY + DAY -->
+  <div class="g2">
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Category performance quadrant</div><div class="card-sub">X: conversion % · Y: revenue ($M) · Size: viewers · File: category_quadrant.csv</div></div></div>
+      <div class="ch ch-260"><canvas id="c_scatter" role="img" aria-label="Scatter plot of categories by conversion rate vs revenue sized by viewer count"></canvas></div>
+      <div class="legend">
+        <div class="leg"><div class="leg-sq" style="background:#1D9E75"></div>Star</div>
+        <div class="leg"><div class="leg-sq" style="background:#378ADD"></div>Quick win</div>
+        <div class="leg"><div class="leg-sq" style="background:#888780"></div>Deprioritise</div>
+      </div>
+      <div class="insight"><div class="insight-dot"></div><div class="insight-text"><strong>No underperforming high-revenue categories.</strong> Every category earning above-average revenue also converts above average. The Optimise quadrant is empty — a well-curated electronics catalogue.</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Conversion rate by day of week</div><div class="card-sub">Purchase rate % per day · File: conversion_by_day.csv</div></div></div>
+      <div class="ch ch-260"><canvas id="c_day" role="img" aria-label="Bar chart showing purchase conversion rate by day of week with Sunday highest"></canvas></div>
+      <div class="insight"><div class="insight-dot"></div><div class="insight-text"><strong>Sunday converts 70% better than Friday.</strong> 13.26% vs 7.61%. Weekend shoppers are more decisive. Shift paid ad budget toward weekend slots for the same cost with significantly higher returns.</div></div>
+    </div>
+  </div>
+
+  <!-- BRAND + WEEKLY ABANDONMENT -->
+  <div class="sec-header"><span class="sec-num">04</span><h2 class="sec-title">Brand efficiency & cart abandonment trend</h2></div>
+
+  <div class="g21">
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Top 10 brands — revenue per viewer</div><div class="card-sub">Revenue generated per browsing user — the true efficiency metric · File: brand_performance.csv</div></div><div class="card-badge">Revenue efficiency</div></div>
+      <div class="ch ch-260"><canvas id="c_brand" role="img" aria-label="Horizontal bar chart of top 10 brands by revenue per viewer with Apple highest at $83.56"></canvas></div>
+      <div class="insight"><div class="insight-dot"></div><div class="insight-text"><strong>Apple viewers are worth 69% more than Samsung viewers.</strong> $83.56 vs $49.42 per visit. Feature Apple products prominently — the revenue per visitor justifies premium placement.</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Weekly cart abandonment rate</div><div class="card-sub">% of carters who never purchased · File: wow_cart_abandonment.csv</div></div></div>
+      <div class="ch ch-260"><canvas id="c_abandon" role="img" aria-label="Line chart showing weekly cart abandonment rate peaking at 58.51 percent during Singles Day week"></canvas></div>
+      <div class="insight"><div class="insight-dot"></div><div class="insight-text"><strong>Singles Day drove peak abandonment of 58.51%.</strong> Users loaded carts but deferred purchase. Post-event abandonment stabilised at ~48–49%, above pre-spike baseline — suggesting lingering price sensitivity.</div></div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════
+     PAGE 3 — REVENUE & INSIGHTS
+══════════════════════════════════ -->
+<div class="page" id="page2">
+
+  <div class="page-title-band">
+    <div><div class="ptb-title">Revenue analysis & strategic insights</div><div class="ptb-sub">Price tier revenue · Pareto analysis · User segments · 5 actionable recommendations</div></div>
+    <div class="card-badge">Dashboard 3 of 3</div>
+  </div>
+
+  <div class="sec-header"><span class="sec-num">05</span><h2 class="sec-title">Revenue distribution</h2></div>
+  <div class="narrative">82.4% of all revenue comes from products priced above $200. Budget items ($0–50) account for only 1.62% of revenue despite heavy browsing. This business lives and dies by premium electronics — and the top 10% of buyers alone generate nearly half of all revenue.</div>
+
+  <div class="g3">
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Revenue by price tier</div><div class="card-sub">% of total $315M · File: revenue_by_price_tier.csv</div></div></div>
+      <div class="ch ch-220"><canvas id="c_tier" role="img" aria-label="Donut chart showing revenue percentage by price tier with premium dominating at 44.8 percent"></canvas></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Revenue concentration — Pareto</div><div class="card-sub">% of revenue by buyer decile · File: revenue_concentration.csv</div></div></div>
+      <div class="ch ch-220"><canvas id="c_pareto" role="img" aria-label="Bar chart showing revenue concentration by buyer decile with top decile at 49.83 percent"></canvas></div>
+      <div class="insight"><div class="insight-dot"></div><div class="insight-text"><strong>50/10 distribution — not 80/20.</strong> Top 10% of buyers generate 49.83% of revenue. More concentrated than the classic Pareto rule.</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">High value user segments</div><div class="card-sub">Revenue share by buyer tier · File: high_value_users.csv</div></div></div>
+      <div class="ch ch-220"><canvas id="c_segment" role="img" aria-label="Bar chart comparing three user segments by revenue share and average spend"></canvas></div>
+      <div class="insight"><div class="insight-dot"></div><div class="insight-text"><strong>Top 10% profile:</strong> 65,524 users · avg spend $2,396 · 8.2 purchases · 85 avg views · 5.1 categories. Protect this group at all costs.</div></div>
+    </div>
+  </div>
+
+  <!-- CONVERSION BY PRICE TIER -->
+  <div class="sec-header"><span class="sec-num">06</span><h2 class="sec-title">Conversion by price tier</h2></div>
+  <div class="g2">
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Purchase rate by price tier</div><div class="card-sub">% of users who purchased per tier · File: conversion_by_price_tier.csv</div></div></div>
+      <div class="ch ch-200"><canvas id="c_price_conv" role="img" aria-label="Bar chart showing purchase rate by price tier with mid-range highest at 10.27 percent"></canvas></div>
+      <div class="insight"><div class="insight-dot"></div><div class="insight-text"><strong>Mid-range $50–200 is the sweet spot.</strong> Highest purchase rate (10.27%) AND drives 40% of all purchases. Budget items have the lowest conversion despite being cheapest.</div></div>
+    </div>
+
+    <div class="card">
+      <div class="card-header"><div><div class="card-title">Top 10 categories — overall conversion</div><div class="card-sub">% of viewers who eventually purchased · File: category_performance.csv</div></div></div>
+      <div class="ch ch-200"><canvas id="c_cat_conv" role="img" aria-label="Bar chart showing conversion rate by category with electronics.smartphone highest"></canvas></div>
+      <div class="insight"><div class="insight-dot"></div><div class="insight-text"><strong>Smartphones lead on every metric.</strong> $168M revenue · 12.99% conversion · 20.11% view-to-cart rate. The single most valuable category by every measure.</div></div>
+    </div>
+  </div>
+
+  <!-- RECOMMENDATIONS -->
+  <div class="sec-header"><span class="sec-num">07</span><h2 class="sec-title">5 recommendations — backed by data</h2></div>
+  <div class="narrative">These are not generic best practices. Each recommendation is derived directly from the analysis with a specific number attached. Ordered by estimated revenue impact.</div>
+  <div class="rec-grid">
+    <div class="rec-card"><div class="rec-num">Priority 01</div><div class="rec-title">Fix the view-to-cart gap</div><div class="rec-body">80.69% of viewers never cart. Improve product discovery, search filtering and recommendation algorithms. This single stage is responsible for 4M lost potential buyers.</div><div class="rec-opp">4,095,942 users</div></div>
+    <div class="rec-card"><div class="rec-num">Priority 02</div><div class="rec-title">Recover cart abandoners</div><div class="rec-body">454,687 users carted but never purchased. Price is NOT the barrier — avg cart price is identical ($209 vs $208). Focus on re-engagement emails and session continuity, not discounts.</div><div class="rec-opp">$94M potential</div></div>
+    <div class="rec-card"><div class="rec-num">Priority 03</div><div class="rec-title">Invest in weekend campaigns</div><div class="rec-body">Sunday converts at 13.26% vs Friday 7.61% — a 70% difference. Shift paid ad spend toward weekend slots for the same budget with significantly higher returns.</div><div class="rec-opp">70% uplift</div></div>
+    <div class="rec-card"><div class="rec-num">Priority 04</div><div class="rec-title">Protect top 10% of buyers</div><div class="rec-body">65,524 users generate $157M — 49.83% of all revenue. They average 8.2 purchases and browse 5.1 categories. A loyalty programme for this group has exceptionally high ROI.</div><div class="rec-opp">$157M revenue</div></div>
+    <div class="rec-card"><div class="rec-num">Priority 05</div><div class="rec-title">Feature Apple prominently</div><div class="rec-body">Apple generates $83.56 revenue per viewer vs Samsung $49.42 — 69% more valuable per visit. Homepage and campaign placement should reflect this efficiency gap.</div><div class="rec-opp">$83.56/viewer</div></div>
+  </div>
+
+</div>
+
+<footer>Sales Funnel Drop-off Analysis · PostgreSQL 18.3 · 109,819,981 rows · Oct–Nov 2019 · E-commerce Behaviour Data (Kaggle) · 13 SQL scripts · 25 CSV exports · Built as a portfolio data analytics project</footer>
+
+<script>
+// ── THEME & PAGE ──
+function toggleTheme(){
+  const b=document.body;
+  b.setAttribute('data-theme',b.getAttribute('data-theme')==='dark'?'light':'dark');
+  setTimeout(rebuildAll,60);
+}
+function showPage(i,btn){
+  document.querySelectorAll('.page').forEach((p,j)=>p.classList.toggle('active',j===i));
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+}
+
+// ── COLOUR HELPERS ──
+const dk=()=>document.body.getAttribute('data-theme')==='dark';
+const G=()=>dk()?'rgba(255,255,255,.07)':'rgba(0,0,0,.07)';
+const T=()=>dk()?'#706a60':'#807b72';
+const T2=()=>dk()?'#b0aa9e':'#48443a';
+const S=()=>dk()?'#1a1814':'#ffffff';
+
+Chart.defaults.font.family="'IBM Plex Sans',sans-serif";
+Chart.defaults.font.size=11;
+
+let charts={};
+function destroyAll(){Object.values(charts).forEach(c=>{try{c.destroy()}catch(e){}});charts={};}
+
+function rebuildAll(){
+  destroyAll();
+
+  // FUNNEL
+  const dc=['#1D9E75','#1D9E75','#EF9F27','#E24B4A','#EF9F27','#E24B4A','#EF9F27'];
+  charts.funnel=new Chart(document.getElementById('c_funnel'),{
+    type:'bar',
+    data:{labels:['Exposure','View','Repeat view','Cart','Cart abandon','Purchase','Repeat buy'],
+      datasets:[{data:[5076814,5076318,3225600,980376,454687,655222,270374],
+        backgroundColor:dc.map(c=>c+'bb'),borderColor:dc,borderWidth:1.5,borderRadius:4}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.raw.toLocaleString()+' users'}}},
+      scales:{
+        x:{grid:{color:G()},ticks:{color:T(),callback:v=>(v/1000000).toFixed(1)+'M'},border:{color:G()}},
+        y:{grid:{display:false},ticks:{color:T2()},border:{color:G()}}
+      }}
+  });
+
+  // WEEKLY
+  const wc=['#378ADD88','#378ADD88','#378ADD88','#378ADD88','#378ADD88','#378ADD88','#E24B4Add','#378ADD88','#378ADD88'];
+  charts.weekly=new Chart(document.getElementById('c_weekly'),{
+    type:'bar',
+    data:{labels:['Sep 30','Oct 7','Oct 14','Oct 21','Oct 28','Nov 4','Nov 11','Nov 18','Nov 25'],
+      datasets:[
+        {type:'bar',label:'Revenue ($M)',data:[25.7,31.5,37.6,33.4,28.7,31.3,67.8,30.7,28.4],
+         backgroundColor:wc,borderColor:wc.map(c=>c.slice(0,7)),borderWidth:1.5,borderRadius:4,yAxisID:'y'},
+        {type:'line',label:'WoW change %',data:[null,22.3,19.6,-11.3,-14.1,9.1,116.9,-54.7,-7.4],
+         borderColor:'#1D9E75',backgroundColor:'transparent',borderWidth:2,pointRadius:4,
+         pointBackgroundColor:[...Array(9)].map((_,i)=>i===6?'#E24B4A':i>0?'#1D9E75':'transparent'),
+         tension:0.3,yAxisID:'y2'}
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:T2(),boxWidth:10}}},
+      scales:{
+        x:{grid:{color:G()},ticks:{color:T()},border:{color:G()}},
+        y:{position:'left',grid:{color:G()},ticks:{color:T(),callback:v=>'$'+v+'M'},border:{color:G()}},
+        y2:{position:'right',grid:{display:false},ticks:{color:T(),callback:v=>v+'%'},border:{color:G()}}
+      }}
+  });
+
+  // SCATTER
+  const sd=[
+    {x:8.41,y:17.6,r:12,label:'video.tv',q:'star'},
+    {x:7.17,y:11.3,r:10,label:'notebook',q:'star'},
+    {x:8.65,y:10.2,r:11,label:'washer',q:'star'},
+    {x:8.87,y:9.2,r:14,label:'headphone',q:'star'},
+    {x:6.49,y:7.3,r:10,label:'refrigerators',q:'star'},
+    {x:5.73,y:10.7,r:13,label:'clocks',q:'star'},
+    {x:8.48,y:4.4,r:11,label:'vacuum',q:'star'},
+    {x:6.14,y:2.2,r:8,label:'tablet',q:'star'},
+    {x:7.15,y:1.0,r:6,label:'printer',q:'qw'},
+    {x:4.21,y:1.0,r:8,label:'auto.player',q:'qw'},
+    {x:6.62,y:0.8,r:7,label:'oven',q:'qw'},
+    {x:8.30,y:0.7,r:7,label:'microwave',q:'qw'},
+    {x:2.97,y:1.5,r:8,label:'desktop',q:'dep'},
+    {x:2.59,y:1.3,r:10,label:'shoes',q:'dep'},
+    {x:1.84,y:1.1,r:7,label:'sofa',q:'dep'},
+    {x:2.44,y:1.1,r:8,label:'cabinet',q:'dep'},
+  ];
+  charts.scatter=new Chart(document.getElementById('c_scatter'),{
+    type:'bubble',
+    data:{datasets:[
+      {label:'Star',data:sd.filter(d=>d.q==='star').map(d=>({x:d.x,y:d.y,r:d.r,label:d.label})),backgroundColor:'#1D9E7566',borderColor:'#1D9E75',borderWidth:1.5},
+      {label:'Quick win',data:sd.filter(d=>d.q==='qw').map(d=>({x:d.x,y:d.y,r:d.r,label:d.label})),backgroundColor:'#378ADD66',borderColor:'#378ADD',borderWidth:1.5},
+      {label:'Deprioritise',data:sd.filter(d=>d.q==='dep').map(d=>({x:d.x,y:d.y,r:d.r,label:d.label})),backgroundColor:'#88878066',borderColor:'#888780',borderWidth:1.5},
+    ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:T2(),boxWidth:10}},
+        tooltip:{callbacks:{label:ctx=>' '+ctx.raw.label+': '+ctx.raw.x+'% conv · $'+ctx.raw.y+'M'}}},
+      scales:{
+        x:{title:{display:true,text:'Conversion %',color:T()},grid:{color:G()},ticks:{color:T()},border:{color:G()},min:0,max:15},
+        y:{title:{display:true,text:'Revenue ($M)',color:T()},grid:{color:G()},ticks:{color:T(),callback:v=>'$'+v+'M'},border:{color:G()},min:0,max:20}
+      }}
+  });
+
+  // DAY
+  charts.day=new Chart(document.getElementById('c_day'),{
+    type:'bar',
+    data:{labels:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'],
+      datasets:[{data:[13.26,8.27,8.00,8.19,8.03,7.61,9.39],
+        backgroundColor:['#E24B4Acc','#378ADD44','#378ADD44','#378ADD44','#378ADD44','#378ADD33','#378ADD77'],
+        borderColor:['#E24B4A','#378ADD','#378ADD','#378ADD','#378ADD','#378ADD','#378ADD'],
+        borderWidth:1.5,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' '+ctx.raw+'% purchase rate'}}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:T()},border:{color:G()}},
+        y:{grid:{color:G()},ticks:{color:T(),callback:v=>v+'%'},border:{color:G()},min:0,max:16}
+      }}
+  });
+
+  // BRAND
+  charts.brand=new Chart(document.getElementById('c_brand'),{
+    type:'bar',
+    data:{labels:['Apple','Navien','Samsung','Acer','LG','Oppo','Xiaomi','Lenovo','Epson','Sony'],
+      datasets:[{data:[83.56,71.48,49.42,29.51,24.00,22.12,21.41,21.21,20.74,20.11],
+        backgroundColor:['#E24B4Acc','#E24B4A88','#378ADDcc','#378ADD88','#378ADD66','#378ADD55','#378ADD44','#378ADD44','#378ADD33','#378ADD33'],
+        borderColor:['#E24B4A','#E24B4A','#378ADD','#378ADD','#378ADD','#378ADD','#378ADD','#378ADD','#378ADD','#378ADD'],
+        borderWidth:1.5,borderRadius:4}]},
+    options:{indexAxis:'y',responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false},tooltip:{callbacks:{label:ctx=>' $'+ctx.raw+' per viewer'}}},
+      scales:{
+        x:{grid:{color:G()},ticks:{color:T(),callback:v=>'$'+v},border:{color:G()}},
+        y:{grid:{display:false},ticks:{color:T2()},border:{color:G()}}
+      }}
+  });
+
+  // ABANDONMENT
+  const ar=[null,-68.36,13.23,8.61,-57.25,20.65,58.51,49.46,48.40];
+  charts.abandon=new Chart(document.getElementById('c_abandon'),{
+    type:'line',
+    data:{labels:['Sep 30','Oct 7','Oct 14','Oct 21','Oct 28','Nov 4','Nov 11','Nov 18','Nov 25'],
+      datasets:[{label:'Abandon rate %',data:ar,
+        borderColor:'#E24B4A',backgroundColor:'#E24B4A18',borderWidth:2.5,fill:true,
+        pointRadius:5,tension:0.3,spanGaps:true,
+        pointBackgroundColor:ar.map(v=>v===null?'transparent':v>40?'#E24B4A':v>0?'#EF9F27':'#1D9E75'),
+        pointBorderColor:ar.map(v=>v===null?'transparent':v>40?'#E24B4A':v>0?'#EF9F27':'#1D9E75'),
+      }]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{color:G()},ticks:{color:T(),font:{size:10}},border:{color:G()}},
+        y:{grid:{color:G()},ticks:{color:T(),callback:v=>v+'%'},border:{color:G()}}
+      }}
+  });
+
+  // TIER DONUT
+  charts.tier=new Chart(document.getElementById('c_tier'),{
+    type:'doughnut',
+    data:{labels:['Premium $200-798','High-value $798+','Mid-range $50-200','Budget $0-50'],
+      datasets:[{data:[44.80,37.62,15.96,1.62],
+        backgroundColor:['#E24B4Acc','#E24B4A66','#378ADDcc','#378ADD33'],
+        borderColor:S(),borderWidth:3}]},
+    options:{responsive:true,maintainAspectRatio:false,cutout:'62%',
+      plugins:{legend:{position:'right',labels:{color:T2(),boxWidth:10,font:{size:10},padding:8}},
+        tooltip:{callbacks:{label:ctx=>' '+ctx.raw+'% of revenue'}}}}
+  });
+
+  // PARETO
+  charts.pareto=new Chart(document.getElementById('c_pareto'),{
+    type:'bar',
+    data:{labels:['Top 10%','11-20%','21-30%','31-40%','41-50%','51-60%','61-70%','71-80%','81-90%','91-100%'],
+      datasets:[
+        {type:'bar',label:'% Revenue',data:[49.83,15.60,10.43,7.42,5.47,4.11,3.08,2.21,1.27,0.59],
+         backgroundColor:(_,i)=>i===0?'#E24B4Acc':'#378ADD44',
+         borderColor:(_,i)=>i===0?'#E24B4A':'#378ADD',
+         borderWidth:1.5,borderRadius:4,yAxisID:'y'},
+        {type:'line',label:'Cumulative %',data:[49.83,65.42,75.85,83.27,88.74,92.86,95.93,98.15,99.41,100],
+         borderColor:'#1D9E75',backgroundColor:'transparent',borderWidth:2,pointRadius:3,tension:0.3,yAxisID:'y2'}
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:T2(),boxWidth:10,font:{size:10}}}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:T(),font:{size:9}},border:{color:G()}},
+        y:{grid:{color:G()},ticks:{color:T(),callback:v=>v+'%'},border:{color:G()},max:60},
+        y2:{position:'right',grid:{display:false},ticks:{color:T(),callback:v=>v+'%'},border:{color:G()},max:110}
+      }}
+  });
+
+  // SEGMENT
+  charts.segment=new Chart(document.getElementById('c_segment'),{
+    type:'bar',
+    data:{labels:['Top 10%\nhigh value','Top 25%\nmid value','Bottom 75%\nlow value'],
+      datasets:[
+        {label:'% of revenue',data:[49.83,21.25,28.92],
+         backgroundColor:['#E24B4Acc','#378ADDcc','#88878066'],
+         borderColor:['#E24B4A','#378ADD','#888780'],borderWidth:1.5,borderRadius:4,yAxisID:'y'},
+        {label:'Avg spend ($)',data:[2396,681,185],
+         type:'line',borderColor:'#EF9F27',backgroundColor:'transparent',
+         borderWidth:2,pointRadius:4,tension:0.3,yAxisID:'y2'}
+      ]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{labels:{color:T2(),boxWidth:10,font:{size:10}}}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:T(),font:{size:10}},border:{color:G()}},
+        y:{grid:{color:G()},ticks:{color:T(),callback:v=>v+'%'},border:{color:G()}},
+        y2:{position:'right',grid:{display:false},ticks:{color:T(),callback:v=>'$'+v},border:{color:G()}}
+      }}
+  });
+
+  // PRICE TIER CONVERSION
+  charts.priceConv=new Chart(document.getElementById('c_price_conv'),{
+    type:'bar',
+    data:{labels:['Budget $0-50','Mid-range $50-200','Premium $200-798'],
+      datasets:[{data:[7.27,10.27,8.80],
+        backgroundColor:['#378ADD44','#1D9E75cc','#378ADD88'],
+        borderColor:['#378ADD','#1D9E75','#378ADD'],borderWidth:1.5,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:T(),font:{size:10}},border:{color:G()}},
+        y:{grid:{color:G()},ticks:{color:T(),callback:v=>v+'%'},border:{color:G()},min:0,max:14}
+      }}
+  });
+
+  // CATEGORY CONVERSION
+  charts.catConv=new Chart(document.getElementById('c_cat_conv'),{
+    type:'bar',
+    data:{labels:['smartphone','washer','headphone','video.tv','vacuum','notebook','printer','refrigerators','tablet','clocks'],
+      datasets:[{data:[12.99,8.65,8.87,8.41,8.48,7.17,7.15,6.49,6.14,5.73],
+        backgroundColor:(_,i)=>i===0?'#E24B4Acc':'#378ADD55',
+        borderColor:(_,i)=>i===0?'#E24B4A':'#378ADD',
+        borderWidth:1.5,borderRadius:4}]},
+    options:{responsive:true,maintainAspectRatio:false,
+      plugins:{legend:{display:false}},
+      scales:{
+        x:{grid:{display:false},ticks:{color:T(),font:{size:9},maxRotation:30},border:{color:G()}},
+        y:{grid:{color:G()},ticks:{color:T(),callback:v=>v+'%'},border:{color:G()}}
+      }}
+  });
+}
+
+window.addEventListener('load',rebuildAll);
+</script>
+</body>
+</html>

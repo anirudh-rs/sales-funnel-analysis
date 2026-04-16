@@ -1,0 +1,5 @@
+price_tier,total_purchases,unique_buyers,total_revenue,avg_purchase_price,pct_of_total_revenue,revenue_per_user
+Premium (200-798),578847,289911,226281293.23,390.92,44.80,68.66
+High-value (798+),163771,79941,190049126.39,1160.46,37.62,122.21
+Mid-range (50-200),647166,349542,80632652.35,124.59,15.96,23.68
+Budget (0-50),269919,166330,8163221.47,30.24,1.62,3.57

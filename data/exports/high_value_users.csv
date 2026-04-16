@@ -1,0 +1,4 @@
+user_segment,users,avg_spend,total_spend,pct_of_revenue,avg_purchases,avg_views,avg_categories
+Top 10% — high value,65524,2396.08,157000715.98,49.83,8.2,85,5.1
+Top 25% — mid value,98284,681.18,66948961.02,21.25,2.6,57,4.1
+Bottom 75% — low value,491414,185.44,91127490.05,28.92,1.4,51,3.9

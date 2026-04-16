@@ -1,0 +1,6 @@
+stage,stage_name,users,dropped_at_stage,dropoff_rate_pct,pct_of_total_users
+1,Exposure,5076814,496,0.01,100.00
+2,View,5076318,4095942,80.69,99.99
+3,Cart,980376,454687,46.38,19.31
+4,Purchase,655222,384848,58.74,12.91
+5,Repeat buy,270374,0,0.00,5.33
