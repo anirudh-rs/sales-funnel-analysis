@@ -4,13 +4,32 @@
 
 A pure SQL analytics project processing **109 million real e-commerce events** to identify funnel drop-off, revenue concentration and channel performance across a 2-month window of an Eastern European electronics retailer.
 
-Built entirely in **PostgreSQL 18.3** with no Python — raw data ingestion, a 5-step preprocessing pipeline, funnel analysis, week-over-week trend tracking, revenue concentration and brand efficiency — visualised in an interactive HTML dashboard and Tableau Public.
+Built entirely in **PostgreSQL 18.3** with no Python — raw data ingestion, a 5-step preprocessing pipeline, funnel analysis, week-over-week trend tracking, revenue concentration and brand efficiency — visualised across 3 interactive Tableau Public dashboards and a standalone HTML dashboard.
+
+---
+
+## Live Dashboards
+
+### Overview
+> Funnel drop-off by stage · KPI tiles · Preprocessing obstacle log
+
+[![Overview Dashboard](https://img.shields.io/badge/Tableau_Public-Overview-1D9E75?style=for-the-badge&logo=tableau&logoColor=white)](https://public.tableau.com/app/profile/anirudh.raghavendra/viz/SalesFunnel1_17772564713410/Overview)
+
+### Performance
+> Weekly revenue trends · Category scatter · Brand efficiency · Day of week conversion · Cart abandonment trend
+
+[![Performance Dashboard](https://img.shields.io/badge/Tableau_Public-Performance-185FA5?style=for-the-badge&logo=tableau&logoColor=white)](https://public.tableau.com/app/profile/anirudh.raghavendra/viz/SalesFunnel2/Performance)
+
+### Revenue & Insights
+> Price tier revenue · Pareto analysis · High value user segments · 5 business recommendations
+
+[![Revenue & Insights Dashboard](https://img.shields.io/badge/Tableau_Public-Revenue_%26_Insights-BF3A0E?style=for-the-badge&logo=tableau&logoColor=white)](https://public.tableau.com/app/profile/anirudh.raghavendra/viz/SalesFunnel3/RevenueInsights)
 
 ---
 
 ## The Most Surprising Finding
 
-Cart abandonment is **not a price problem**.
+Cart abandonment is **not a price problem.**
 
 Converted and abandoned users had virtually identical average cart prices — **$209.70 vs $208.06**. A difference of $1.64. The barrier is engagement depth. Converted users viewed 40% more products and had twice as many cart interactions before purchasing.
 
@@ -34,7 +53,7 @@ Converted and abandoned users had virtually identical average cart prices — **
 
 ## Dataset
 
-**E-commerce Behaviour Data** from Kaggle  
+**E-commerce Behaviour Data from Multi-Category Store**
 Source: https://www.kaggle.com/datasets/mkechinov/ecommerce-behavior-data-from-multi-category-store
 
 | File | Size | Rows |
@@ -43,7 +62,7 @@ Source: https://www.kaggle.com/datasets/mkechinov/ecommerce-behavior-data-from-m
 | events_nov.csv | 5.5GB | 67,395,246 |
 | **Combined** | **14.2GB** | **109,877,244** |
 
-> Raw CSV files are not included in this repository due to size.  
+> Raw CSV files are not included in this repository due to size.
 > See `data/raw/DATA_SOURCE.md` for download instructions.
 
 ---
@@ -53,7 +72,7 @@ Source: https://www.kaggle.com/datasets/mkechinov/ecommerce-behavior-data-from-m
 - **Database:** PostgreSQL 18.3
 - **Query tool:** pgAdmin 4
 - **SQL techniques:** CTEs, window functions, LAG/LEAD, PERCENTILE_CONT, IQR outlier detection, DATE_TRUNC, ROW_NUMBER, CASE statements
-- **Visualisation:** Tableau Public + standalone HTML/CSS/JS dashboard
+- **Visualisation:** Tableau Public (3 dashboards) + standalone HTML/CSS/JS dashboard
 - **Version control:** Git / GitHub
 
 ---
@@ -216,16 +235,38 @@ analysis/12_roi_by_channel.sql
 reports/13_final_summary.sql
 ```
 
-> **Note:** Loading 109M rows takes approximately 20–30 minutes.  
-> Preprocessing queries take 10–60 minutes each depending on hardware.  
+> **Note:** Loading 109M rows takes approximately 20–30 minutes.
+> Preprocessing queries take 10–60 minutes each depending on hardware.
 > Add indexes in `07_master_clean.sql` before running analysis queries.
 
 ---
 
 ## Dashboard
 
-Open `tableau/sales_funnel_dashboard_final.html` in any browser for the standalone interactive dashboard — no internet connection required.
+### Standalone HTML Dashboard
+Open `tableau/sales_funnel_dashboard_final.html` in any browser — no internet connection required. Includes dark/light toggle, 3 dashboard pages, 8 interactive charts and full narrative text.
 
-Live Tableau Public dashboard: *[link to be added after publish]*
+### Tableau Public Dashboards
+
+| Dashboard | Link |
+|---|---|
+| Overview — funnel drop-off, KPI tiles, preprocessing log | [View on Tableau Public](https://public.tableau.com/app/profile/anirudh.raghavendra/viz/SalesFunnel1_17772564713410/Overview) |
+| Performance — weekly trends, category scatter, brand efficiency | [View on Tableau Public](https://public.tableau.com/app/profile/anirudh.raghavendra/viz/SalesFunnel2/Performance) |
+| Revenue & Insights — price tiers, Pareto, recommendations | [View on Tableau Public](https://public.tableau.com/app/profile/anirudh.raghavendra/viz/SalesFunnel3/RevenueInsights) |
 
 ---
+
+## Analytical Decision Log
+
+Every significant analytical decision made during this project is documented in the interactive flowchart — `project_flowchart.html`. Open it in any browser to see:
+
+- Why PostgreSQL was chosen over MySQL
+- Why nulls were filled rather than deleted
+- Why the IQR fence changed from 798.34 to 797.83
+- Why the Singles Day spike was kept rather than treated as an outlier
+- Why IN (SELECT) subqueries were replaced with CTEs
+- 13 decisions total with full rationale
+
+---
+
+*Built as a portfolio data analytics project · PostgreSQL 18.3 · Pure SQL · No Python*
