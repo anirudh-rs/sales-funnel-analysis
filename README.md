@@ -136,7 +136,6 @@ Sales Funnel/
 ├── tableau/
 │   └── sales_funnel_dashboard_final.html  ← Standalone interactive dashboard
 │
-├── project_flowchart.html          ← Interactive decision log flowchart
 └── README.md                       ← This file
 ```
 
@@ -253,19 +252,6 @@ Open `tableau/sales_funnel_dashboard_final.html` in any browser — no internet 
 | Overview — funnel drop-off, KPI tiles, preprocessing log | [View on Tableau Public](https://public.tableau.com/app/profile/anirudh.raghavendra/viz/SalesFunnel1_17772564713410/Overview) |
 | Performance — weekly trends, category scatter, brand efficiency | [View on Tableau Public](https://public.tableau.com/app/profile/anirudh.raghavendra/viz/SalesFunnel2/Performance) |
 | Revenue & Insights — price tiers, Pareto, recommendations | [View on Tableau Public](https://public.tableau.com/app/profile/anirudh.raghavendra/viz/SalesFunnel3/RevenueInsights) |
-
----
-
-## Analytical Decision Log
-
-Every significant analytical decision made during this project is documented in the interactive flowchart — `project_flowchart.html`. Open it in any browser to see:
-
-- Why PostgreSQL was chosen over MySQL
-- Why nulls were filled rather than deleted
-- Why the IQR fence changed from 798.34 to 797.83
-- Why the Singles Day spike was kept rather than treated as an outlier
-- Why IN (SELECT) subqueries were replaced with CTEs
-- 13 decisions total with full rationale
 
 ---
 
